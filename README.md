@@ -1,2 +1,51 @@
-# hypthesis
-z-test on wave developed seas
+# Hypothesis Testing
+
+This project is focused on scatter joint probabilities properties and hypothesis testing. The goal is to determine whether you can expect significant results based on the assumed statistical distribution, sample size, error levels, and other relevant factors. This guide outlines the minimum workflow required to conduct project.
+
+The data used in this project are the scatter diagram of wave heights and periods. The source is from paper XXXX.
+
+## Workflow
+
+1. **Define Statistical Distribution**:
+    - Start by defining the statistical distribution of your samples in at least two groups (e.g., treatment and control or treatment1 and treatment2).
+    - This is a crucial step, so choose the distribution based on your best knowledge and intuition. You may choose a multivariate distribution if applicable.
+
+2. **Generate Samples**:
+    - Generate a number of samples for each group based on the defined distribution.
+
+3. **Add Distortion**:
+    - You can introduce some form of distortion in each group, such as noise or measurement error, to simulate real-world data.
+
+4. **Choose a Statistical Test**:
+    - Select an appropriate statistical test based on your discipline and the nature of your data.
+
+5. **Check Assumptions**:
+    - Ensure that your samples satisfy the assumptions of the chosen statistical test. If they do not, consider selecting an alternative test.
+
+6. **Evaluate Significance**:
+    - Determine whether the treatment and control groups show significant differences.
+
+7. **Determine Minimal Sample Size**:
+    - Identify the minimal sample size at which your results are statistically significant at a p-value of < 0.05.
+
+8. **Visualize Results**:
+    - Prepare a plot that illustrates the experiment and the statistical test results.
+
+## Suggested Extensions
+
+You can improve this workflow by introducing additional complexity to your experiment, such as:
+
+- Additional factors in treatment groups
+- Post-hoc tests
+- Handling missing data
+
+These extensions are optional but can make your experiment more comprehensive.
+
+## Submission
+
+Please submit a short report explaining your assumptions, methods, and results. Include any relevant plots and figures to support your findings. Additionally, provide the script used to conduct your experiment in a separate file.
+
+---
+
+Feel free to adapt the workflow and experiment design as needed to better fit your research objectives.
+
