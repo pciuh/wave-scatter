@@ -37,13 +37,7 @@ def calcov(x,y,pxy):
 #
 ########
 
-df = pd.read_csv('wav_scat_.csv',sep=';',index_col=0)
-
-#vec = np.linspace(4.25,2.75,4)
-#for x in vec:
-    #df[str(x)] = np.zeros_like(df['5.25'])
-#
-#print(df.shape)
+df = pd.read_csv('wav_scat.csv',sep=';',index_col=0)
 
 df.index   = df.index.values
 df.columns = df.columns.values.astype(float)
@@ -73,13 +67,6 @@ print('ste:',ste)
 te = [min(vte),max(vte)]
 hs = [min(vhs),max(vhs)]
 
-#te  = [1.0,16.0]   ##### Period range
-#hs  = [0.5,15.5]   ##### Wave height range
-
-#mu  = np.array([6.24,2.60])    #### Mean period, mean wave height
-#mu  = np.array([9.125,2.61])    #### Mean period, mean wave height
-#print(mu[0]/np.sqrt(mu[1]))
-
 cov = [[ste,cv],[cv,shs]]
 
 print('      Mean:',mu)
@@ -88,15 +75,13 @@ print('Covariance:',cov)
 rnd_seed = 12321
 distr = scs.multivariate_normal(cov = cov, mean = mu, seed = rnd_seed)
 
-nSmpl = 'L'
-N     = {'L' : 12000, 'S' : 153}
+nSmpl = 'S'
+N     = {'L' : 3000, 'S' : 153}
 
 nData = N[nSmpl]
 fdat = distr.rvs(size=nData)
 
 hsg,teg = np.meshgrid(vhs,vte)
-#fpdf = distr.pdf(np.array([[vte],[vhs]]).T)
-
 fpdf = distr.pdf(fdat)
 
 t_noi = np.random.normal(0.0,0.50,nData)
@@ -155,8 +140,6 @@ dfo = pd.Series(dc)
 
 dfo.to_csv('Test.csv',sep=';')
 
-LBL = ('Period, [s]','Wave height, [m]')
-
 p_title = 'Estimated Data (Atlantinc Marine Energy Test Site)'
 LBL = ('Period, [s]','Wave height, [m]')
 
@@ -178,27 +161,25 @@ cMap  = 'PuRd'
 
 
 cmap = plt.get_cmap(cMap)
-
-# Define the number of colors you want to extract
 num_colors = 10
-
-# Generate colors and convert to hex
 hex_col = [mcol.to_hex(cmap(i / num_colors)) for i in range(num_colors)]
-
 
 p_col = hex_col[4]
 l_col = hex_col[-4]
 fig,ax = plt.subplots()
 
-ax.imshow(df,cmap=cMap,extent=(min(vte),max(vte),min(vhs),max(vhs)))
-ax.set_xticks(np.linspace(3.75,13.75,6))
-ax.set_yticks(np.linspace(3.75,13.75,6))
-#ax.set_xticklabels([str(x) for x in vte])
-#ax.set_yticklabels([str(x) for x in vhs])
+
+teg,hsg = np.meshgrid(vte,vhs)
+ax.scatter(teg,hsg,c=df.replace(0,np.nan).values,s=60,cmap=cMap,marker='s')
+ax.set_xlim(0,16)
+ax.set_ylim(0,16)
+#ax.set_xticks(np.arange(min(vte),max(vte),2))
+#ax.set_yticks(np.arange(min(vhs),max(vhs),2))
+ax.set_xlabel(LBL[0])
+ax.set_ylabel(LBL[1])
 ax.set_aspect(1)
 
-plt.show()
-
+fig.savefig('scatter.png',dpi=300)
 
 fig,ax = plt.subplots(1,figsize=(9,9))
 
