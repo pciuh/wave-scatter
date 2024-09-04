@@ -13,20 +13,17 @@ The data used in this project comes from the scatter diagram of wave heights and
 2. **Generate Samples**:
     - Generate a number of samples for each group based on the defined distribution.
 
-3. **Add Distortion**:
-    - You can introduce some form of distortion in each group, such as noise or measurement error, to simulate real-world data.
-
-4. **Choose a Statistical Test**:
+3. **Choose a Statistical Test**:
     - Select an appropriate statistical test based on your discipline and the nature of your data.
 
-5. **Check Assumptions**:
+4. **Check Assumptions**:
     - Ensure that your samples satisfy the assumptions of the chosen statistical test. If they do not, consider selecting an alternative test.
 
-6. **Evaluate Significance**:
+5. **Evaluate Significance**:
     - Determine whether the treatment and control groups show significant differences.
 
-7. **Determine Minimal Sample Size**:
+6. **Determine Minimal Sample Size**:
     - Identify the minimal sample size at which your results are statistically significant at a p-value of < 0.05.
 
-8. **Visualize Results**:
+7. **Visualize Results**:
     - Prepare a plot that illustrates the experiment and the statistical test results.
