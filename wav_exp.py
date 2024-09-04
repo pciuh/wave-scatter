@@ -12,7 +12,9 @@ import matplotlib.colors as mcol
 import scipy.stats as scs
 import numpy as np
 
-import seaborn as sns
+def calvar(x,p):
+    mu = np.sum(x*p)
+    return np.sum(p*(x-mu)**2)
 
 def calcov(x,y,pxy):
     xy = []
@@ -20,9 +22,13 @@ def calcov(x,y,pxy):
         xy = np.append(xy,xx*y)
     xy = xy.reshape(-1,y.shape[0])
 
+    print(xy.shape,pxy.shape)
     Ex,Ey,Exy = sum(pxy.T@x).round(4),sum(pxy@y).round(4),np.sum(xy*pxy).round(4)
-
-    return (Exy-Ex*Ey,Ex,Ey,Exy)
+    Cxx,Cyy = calvar(x,np.sum(pxy,axis=1)),calvar(y,np.sum(pxy,axis=0))
+    Cxy = Exy-Ex*Ey
+    cov = np.array([[Cxx,Cxy],[Cxy,Cyy]])
+    mu  = np.array([Ex,Ey])
+    return (cov,mu)
 
 #####
 #
@@ -39,6 +45,10 @@ def calcov(x,y,pxy):
 
 df = pd.read_csv('wav_scat.csv',sep=';',index_col=0)
 
+#df = df.iloc[:,:-4]
+#df.to_csv('wav_scat.csv',sep=';')
+
+print(df.head())
 df.index   = df.index.values
 df.columns = df.columns.values.astype(float)
 df = df.reindex(sorted(df.columns), axis=1)
@@ -51,32 +61,31 @@ pht = df.values
 phs = df.sum(axis=1)/1e2
 pte = df.sum(axis=0)/1e2
 
-print(sum(pte*vte))
-print(sum(phs*vhs))
 
-vcov = calcov(vhs,vte,pht/1e2)
+r,c = np.where(df.values == df.max().max())
 
-cv = vcov[0]
 
-mu = [vcov[2],vcov[1]-.0]
+cov,mu = calcov(vte,vhs,pht.T/1e2)
 
-shs = np.sqrt(np.sum(phs*(vhs-vcov[1])**2)) #/(len(vhs)-1))
-ste = np.sqrt(np.sum(pte*(vte-vcov[2])**2)) #/(len(vte)-1))
-print('shs:',shs)
-print('ste:',ste)
+
+print(df.iloc[r,c])
+
+#mu = [8.75,1.75]
+
 te = [min(vte),max(vte)]
 hs = [min(vhs),max(vhs)]
 
-cov = [[ste,cv],[cv,shs]]
+#cov = [[ste,cv],[cv,shs]]
 
 print('      Mean:',mu)
 print('Covariance:',cov)
 
 rnd_seed = 12321
+rnd_seed = None
 distr = scs.multivariate_normal(cov = cov, mean = mu, seed = rnd_seed)
 
-nSmpl = 'S'
-N     = {'L' : 3000, 'S' : 153}
+nSmpl = 'L'
+N     = {'L' : 6720, 'S' : 153}
 
 nData = N[nSmpl]
 fdat = distr.rvs(size=nData)
@@ -166,20 +175,25 @@ hex_col = [mcol.to_hex(cmap(i / num_colors)) for i in range(num_colors)]
 
 p_col = hex_col[4]
 l_col = hex_col[-4]
-fig,ax = plt.subplots()
-
 
 teg,hsg = np.meshgrid(vte,vhs)
-ax.scatter(teg,hsg,c=df.replace(0,np.nan).values,s=60,cmap=cMap,marker='s')
+
+fig,ax = plt.subplots(figsize=(6,6))
+ax.set_title(p_title)
+cax = ax.imshow(df.replace(0,np.nan).values, aspect='auto', cmap=cMap, origin='upper',
+                extent=[min(vte), max(vte), min(vhs), max(vhs)])
+
+#ax.scatter(mu[0],mu[1],c='k',marker='+')
+ax.annotate('%.2f'%mu[0],xytext=(mu[0],mu[0]),xy=(mu[0],mu[1]),ha='center',arrowprops=dict(facecolor='black', arrowstyle='-'))
+ax.annotate('%.2f'%mu[1],xytext=(mu[1],mu[1]),xy=(mu[0],mu[1]),va='center',arrowprops=dict(facecolor='black', arrowstyle='-'))
 ax.set_xlim(0,16)
 ax.set_ylim(0,16)
-#ax.set_xticks(np.arange(min(vte),max(vte),2))
-#ax.set_yticks(np.arange(min(vhs),max(vhs),2))
 ax.set_xlabel(LBL[0])
 ax.set_ylabel(LBL[1])
 ax.set_aspect(1)
 
 fig.savefig('scatter.png',dpi=300)
+
 
 fig,ax = plt.subplots(1,figsize=(9,9))
 
@@ -192,6 +206,10 @@ for i,l in enumerate(vLbl):
     ax.text(xMin+dx,yMax-(i+2)*dy,LBL,va='top',ha='left')
     ax.text(xMin+dx,yMax-(i+2)*dy,l,va='top',ha='right')
 
+
+
+ax.annotate('%.2f'%mu[0],xytext=(mu[0],mu[0]),xy=(mu[0],mu[1]),ha='center',arrowprops=dict(facecolor='black', arrowstyle='-'))
+ax.annotate('%.2f'%mu[1],xytext=(mu[1],mu[1]),xy=(mu[0],mu[1]),va='center',arrowprops=dict(facecolor='black', arrowstyle='-'))
 ax.set_xlim(xMin,xMax)
 ax.set_ylim(yMin,yMax)
 ax.set_xlabel('Wave Period [s]')
@@ -229,22 +247,14 @@ for i in range(nd):
 
     if hor[i]=='horizontal':
         axt.plot(pdf,x,'-',color=p_col,lw=p_linewidth)
-#        ml,sl,bl = axt.stem(xd[i],yd[i],orientation=hor[i])
-#        ml.set_markeredgecolor(p_col)
-#        ml.set_markerfacecolor('none')
-#        sl.set_color(p_col)
-#        bl.set_color('none')
         axt.scatter(yd[i],xd[i],c='none', edgecolors=p_col)
         axt.set_ylim(yMin,yMax)
         axt.invert_xaxis()
-        #axt.grid(axis='y')
     else:
         axt.plot(x,pdf,'-',color=p_col,lw=p_linewidth,label='continuous PDF')
-#        axt.scatter(xd[i],yd[i],c='white',edgecolors=p_col)
         axt.scatter(xd[i],yd[i],c='none', edgecolors=p_col,label='scatter')
         axt.set_xlim(yMin,yMax)
         axt.invert_yaxis()
-        #axt.grid(axis='x')
         axt.legend(frameon=False)
     fig.savefig('test-'+nSmpl+'.png',dpi=300)
     fig.savefig('test-'+nSmpl+'.svg',dpi=300)
