@@ -2,7 +2,7 @@
 
 This project is focused on scatter joint probabilities properties and hypothesis testing. The goal is to determine whether you can expect significant results based on the assumed statistical distribution, sample size, error levels, and other relevant factors. This guide outlines the minimum workflow required to conduct project.
 
-The data used in this project are the scatter diagram of wave heights and periods. The source is from paper XXXX.
+The data used in this project are the scatter diagram of wave heights and periods. The source is from paper: *J. Prendergast, M. Li and W. Sheng, "A Study on the Effects of Wave Spectra on Wave Energy Conversions," in IEEE Journal of Oceanic Engineering, vol. 45, no. 1, pp. 271-283, Jan. 2020, doi: 10.1109/JOE.2018.2869636.*
 
 ## Workflow
 
