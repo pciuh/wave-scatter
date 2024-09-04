@@ -30,22 +30,3 @@ The data used in this project comes from the scatter diagram of wave heights and
 
 8. **Visualize Results**:
     - Prepare a plot that illustrates the experiment and the statistical test results.
-
-## Suggested Extensions
-
-You can improve this workflow by introducing additional complexity to your experiment, such as:
-
-- Additional factors in treatment groups
-- Post-hoc tests
-- Handling missing data
-
-These extensions are optional but can make your experiment more comprehensive.
-
-## Submission
-
-Please submit a short report explaining your assumptions, methods, and results. Include any relevant plots and figures to support your findings. Additionally, provide the script used to conduct your experiment in a separate file.
-
----
-
-Feel free to adapt the workflow and experiment design as needed to better fit your research objectives.
-
