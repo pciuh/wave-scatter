@@ -7,7 +7,7 @@ The data used in this project comes from the scatter diagram of wave heights and
 ## Workflow
 
 1. **Define Statistical Distribution**:
-    - Plotting scatter diagram with colormaps the normal joint probability distribution (bivariate) is assumed
+    - Loaded scatter diagram is assumed to have the normal joint probability distribution (bivariate)
     - To properly generate samples for hypothesis testing the covariance matrix and mean values of wave heights and periods are calculated basing on scatter data
     - Number of samples are split in large and small groups, denoted *L* and *S* respectively.
 
