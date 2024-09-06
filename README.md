@@ -7,8 +7,9 @@ The data used in this project comes from the scatter diagram of wave heights and
 ## Workflow
 
 1. **Define Statistical Distribution**:
-    - Start by defining the statistical distribution of your samples in at least two groups (e.g., treatment and control or treatment1 and treatment2).
-    - This is a crucial step, so choose the distribution based on your best knowledge and intuition. You may choose a multivariate distribution if applicable.
+    - Plotting scatter diagram with colormaps the normal joint probability distribution (bivariate) is assumed
+    - To properly generate samples for hypothesis testing the covariance matrix and mean values of wave heights and periods are calculated basing on scatter data
+    - Number of samples are split in large and small groups, denoted *L* and *S* respectively.
 
 2. **Generate Samples**:
     - Generate a number of samples for each group based on the defined distribution.
