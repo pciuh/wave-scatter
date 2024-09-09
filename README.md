@@ -19,7 +19,7 @@ The data used in this project comes from the scatter diagram of wave heights and
    - The statistical one-tailed z-test is used according to the nature of the considered data.
 
 4. **Determine Minimal Sample Size**:
-- Identify the minimal sample size at which your results are statistically significant at a p-value of < 0.05
+   - Identify the minimal sample size at which your results are statistically significant at a p-value of < 0.05
 
 5. **Visualize Results**:
-- Prepare a plot that illustrates the scatter data and generated population samples
+   - Prepare a plot that illustrates the scatter data and generated population samples
