@@ -9,8 +9,34 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcol
 
+from sklearn.model_selection import train_test_split
+
 import scipy.stats as scs
 import numpy as np
+
+def ztest(x,mp,sp,z_crit,alfa):
+
+    n  = len(x)
+    mx = np.mean(x)
+    sm = sp/np.sqrt(n)
+    zs = (mx-mp)/sm
+    pv = 1-scs.norm.cdf(zs)
+
+    print('Samples data')
+    print(' Number:',n)
+    print('   Mean:',mx)
+
+    # Hypothesis
+    if zs >  zsc:
+        print('Reject Null Hypothesis')
+    else:
+        print('Fail to Reject Null Hypothesis')
+
+    #if pv < alfa:
+        #print('Reject Null Hypothesis')
+    #else:
+        #print('Fail to Reject Null Hypothesis')
+    return(zs,pv)
 
 def calvar(x,p):
     mu = np.sum(x*p)
@@ -39,11 +65,14 @@ def calcov(x,y,pxy):
 
 ########
 #
-#    J. Prendergast, M. Li and W. Sheng, "A Study on the Effects of Wave Spectra on Wave Energy Conversions," in IEEE Journal of Oceanic Engineering, vol. 45, no. 1, pp. 271-283, Jan. 2020, doi: 10.1109/JOE.2018.2869636.
+# [1]   J. Prendergast, M. Li and W. Sheng, "A Study on the Effects of Wave Spectra on Wave Energy Conversions," in IEEE Journal of Oceanic Engineering, vol. 45, no. 1, pp. 271-283, Jan. 2020, doi: 10.1109/JOE.2018.2869636.
 #
 ########
 
-df = pd.read_csv('wav_scat.csv',sep=';',index_col=0)
+iDir = 'input/'
+pDir = 'plots/'
+
+df = pd.read_csv(iDir + 'wav_scat.csv',sep=';',index_col=0)
 
 #df = df.iloc[:,:-4]
 #df.to_csv('wav_scat.csv',sep=';')
@@ -61,13 +90,16 @@ pht = df.values
 phs = df.sum(axis=1)/1e2
 pte = df.sum(axis=0)/1e2
 
+k = np.where(phs == max(phs))[0]
+mte,mhs = np.sum(vte*pte),np.sum(vhs*phs)
 
 r,c = np.where(df.values == df.max().max())
 
 
 cov,mu = calcov(vte,vhs,pht.T/1e2)
-
-
+ste,shs = np.sqrt(np.diag(cov))
+#mu[1] = mhs
+#cov
 print(df.iloc[r,c])
 
 #mu = [8.75,1.75]
@@ -76,29 +108,33 @@ te = [min(vte),max(vte)]
 hs = [min(vhs),max(vhs)]
 
 #cov = [[ste,cv],[cv,shs]]
-
+#cov[0,1] = 1.5
+#cov[1,0] = 0.5
 print('      Mean:',mu)
 print('Covariance:',cov)
 
-rnd_seed = 12321
-rnd_seed = None
+
+
+rnd_seed = 60306
+#rnd_seed = 240906
+#rnd_seed = None
 distr = scs.multivariate_normal(cov = cov, mean = mu, seed = rnd_seed)
 
-nSmpl = 'S'
-N     = {'L' : 6720, 'S' : 53}
 
-nData = N[nSmpl]
+nData = 13189 #### acc. to [1]
+
+N     = {'L' : int(0.15*nData), 'S' : 31}
+
+#N[nSmpl]
 fdat = distr.rvs(size=nData)
 
 hsg,teg = np.meshgrid(vhs,vte)
 fpdf = distr.pdf(fdat)
 
-ste = np.std(vte*pte)
-shs = np.std(vhs*phs)
-
 np.random.seed(rnd_seed)
-t_noi = np.random.normal(0.0,2*ste,nData)
-h_noi = np.random.normal(0.0,2*shs,nData)
+
+t_noi = np.random.normal(0.0,0.50,nData)
+h_noi = np.random.normal(0.0,0.25,nData)
 
 k = np.where(fdat[:,0]<min(te))[0]
 fdat[k,0] = min(te)
@@ -115,57 +151,66 @@ fndat[k,0] = min(te)
 k = np.where(fndat[:,1]<min(hs))[0]
 fndat[k,1] = min(hs)
 
-cht = fndat[:,0]/np.sqrt(fndat[:,1])
-
+period,height = fndat[:,0],fndat[:,1]
 #Hypothesis
 # cht = Period / sqrt(Height)
 # H0 >> Fully developed seas (oceans, open sea areas): cht >= 3.87
 # H1 >> Non-developed seas (offshore sea): cht < 3.87
 
-ctc = 3.87
-
-alf = 1e-2
-zsc = scs.norm.ppf(1-alf)
-
-mcht = np.mean(cht)
-scht = np.std(cht)
-
-
-z = (mcht-ctc)*np.sqrt(nData)/scht
-
-pr = scs.norm.cdf(z)
-
-st,pval = scs.ttest_1samp(cht,ctc,alternative='greater')
-
-print('Z-Score:',st,', p-val:',pval)
-
 vLbl = (r'$\mu$:',r'$\sigma$:',r'$n_{SAMPLES}$:',r'$\alpha$:',r'$z_{CRiT}$:',r'$z_{SCORE}$:',r'$p-val$:')
 pLbl = ('Mean:','St.Dev.:','Num.Samp.:','Sign.Lvl:','Z.Value:','Z.Score:','p.val')
-vVal = (mcht,scht,nData,alf,zsc,z,pval)
 vFmt = ('%6.2f','%6.2f','%6.0f','%6.2f','%6.2f','%6.2f','%6.2f')
 
-for i,l in enumerate(pLbl):
-    FMT = '%20s' + vFmt[i]
-    print(FMT % (l,vVal[i]))
+#### Samples for hypothesis test
+cht = period / np.sqrt(height)
+
+#### Population data
+mcht_p = 4.33
+scht_p = np.std(cht)
+#mcht_p = mte/np.sqrt(mhs)
+#scht_p = ste/np.sqrt(shs)
+
+print('Population data:')
+print('Mean:',mcht_p) #,np.mean(period)/np.sqrt(np.mean(height)))
+print(' Std:',scht_p)
+
+alf = 5e-2
+zsc = scs.norm.ppf(1-alf)
 
 
-dc = dict(zip(pLbl,vVal))
-dfo = pd.Series(dc)
+#### Large Sample
+t_size = N['L']/nData
+_,cht_s = train_test_split(cht,test_size=t_size)
+print()
+zs,pv = ztest(cht_s,mcht_p,scht_p,zsc,alf)
+vVal = (mcht_p,scht_p,len(cht_s),alf,zsc,zs,pv)
+dfo = pd.Series(dict(zip(pLbl,vVal))).round(4)
+print()
+print(dfo)
+#dfo.to_csv('Test-L.csv',sep=';')
 
-dfo.to_csv('Test.csv',sep=';')
+#### Small Sample
+t_size = N['S']/nData
+_,cht_s = train_test_split(cht,test_size=t_size)
+print()
+zs,pv = ztest(cht_s,mcht_p,scht_p,zsc,alf)
+vVal = (mcht_p,scht_p,len(cht_s),alf,zsc,zs,pv)
+dfo = pd.Series(dict(zip(pLbl,vVal))).round(4)
+print()
+print(dfo)
+#dfo.to_csv('Test-S.csv',sep=';')
 
 p_title = 'Estimated Data (Atlantinc Marine Energy Test Site)'
 LBL = ('Period, [s]','Wave height, [m]')
 
-xMin,xMax = (min(te),max(te))
 xMin,xMax = (0,16)
-yMin,yMax = (min(hs),max(hs))
 yMin,yMax = (0,16)
 dx,dy  = (4,2/3)
+
 p_linewidth = 2
 p_col= '#0088cc'
-p_alpha = 0.7
-p_size  = 20
+p_alpha = 0.6
+p_size  = 40
 
 l_col = np.array([4,4,4])/255
 p_col = [x/255 for x in [250,140,80]]
@@ -191,25 +236,25 @@ cax = ax.imshow(df.replace(0,np.nan).values, aspect='auto', cmap=cMap, origin='u
 #ax.scatter(mu[0],mu[1],c='k',marker='+')
 ax.annotate('%.2f'%mu[0],xytext=(mu[0],mu[0]),xy=(mu[0],mu[1]),ha='center',arrowprops=dict(facecolor='black', arrowstyle='-'))
 ax.annotate('%.2f'%mu[1],xytext=(mu[1],mu[1]),xy=(mu[0],mu[1]),va='center',arrowprops=dict(facecolor='black', arrowstyle='-'))
-ax.set_xlim(0,16)
-ax.set_ylim(0,16)
+ax.set_xlim(xMin,xMax)
+ax.set_ylim(yMin,yMax)
 ax.set_xlabel(LBL[0])
 ax.set_ylabel(LBL[1])
 ax.set_aspect(1)
 
-fig.savefig('scatter.png',dpi=300)
+fig.savefig(pDir + 'scatter.png',dpi=300)
 
 
 fig,ax = plt.subplots(1,figsize=(9,9))
 
 ax.set_title(p_title)
-ax.scatter(fndat[:,0],fndat[:,1],marker='o',alpha=p_alpha,
+ax.scatter(fndat[:,0],fndat[:,1],ec='white',marker='s',alpha=p_alpha,
            s=p_size,c=fpdf,cmap=cMap,linewidths=None)
-ax.text(xMin+dx,yMax-dy,'Z-Score test',weight='bold')
-for i,l in enumerate(vLbl):
-    LBL = vFmt[i]%(vVal[i])
-    ax.text(xMin+dx,yMax-(i+2)*dy,LBL,va='top',ha='left')
-    ax.text(xMin+dx,yMax-(i+2)*dy,l,va='top',ha='right')
+#ax.text(xMin+dx,yMax-dy,'Z-Score test',weight='bold')
+#for i,l in enumerate(vLbl):
+    #LBL = vFmt[i]%(vVal[i])
+    #ax.text(xMin+dx,yMax-(i+2)*dy,LBL,va='top',ha='left')
+    #ax.text(xMin+dx,yMax-(i+2)*dy,l,va='top',ha='right')
 
 ax.annotate('%.2f'%mu[0],xytext=(mu[0],mu[0]),xy=(mu[0],mu[1]),ha='center',arrowprops=dict(facecolor='black', arrowstyle='-'))
 ax.annotate('%.2f'%mu[1],xytext=(mu[1],mu[1]),xy=(mu[0],mu[1]),va='center',arrowprops=dict(facecolor='black', arrowstyle='-'))
@@ -218,7 +263,6 @@ ax.set_ylim(yMin,yMax)
 ax.set_xlabel('Wave Period [s]')
 ax.set_ylabel('Wave Height [m]')
 ax.set_aspect(1)
-#ax.grid()
 
 l,b,w,h=ax.get_position().bounds
 
@@ -250,15 +294,16 @@ for i in range(nd):
 
     if hor[i]=='horizontal':
         axt.plot(pdf,x,'-',color=p_col,lw=p_linewidth)
-        axt.scatter(yd[i],xd[i],c='none', edgecolors=p_col)
+        axt.scatter(yd[i],xd[i],marker='s', c='none', edgecolors=p_col)
         axt.set_ylim(yMin,yMax)
         axt.invert_xaxis()
     else:
         axt.plot(x,pdf,'-',color=p_col,lw=p_linewidth,label='continuous PDF')
-        axt.scatter(xd[i],yd[i],c='none', edgecolors=p_col,label='scatter')
+        axt.scatter(xd[i],yd[i],c='none',marker='s', edgecolors=p_col,label='scatter')
         axt.set_xlim(yMin,yMax)
         axt.invert_yaxis()
         axt.legend(frameon=False)
-    fig.savefig('test-'+nSmpl+'.png',dpi=300)
-    fig.savefig('test-'+nSmpl+'.svg',dpi=300)
-    fig.savefig('test-'+nSmpl+'.pdf',dpi=300)
+
+fig.savefig(pDir + 'population.png',dpi=300)
+#    fig.savefig('test-'+nSmpl+'.svg',dpi=300)
+#    fig.savefig('test-'+nSmpl+'.pdf',dpi=300)

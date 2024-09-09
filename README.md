@@ -14,9 +14,10 @@ The data used in this project comes from the scatter diagram of wave heights and
 
 2. **Generate Samples**:
     - A different number of samples, depending on the selected option *L* or *S*, is generated from pre-defined, multivariate distribution
+    - Noise is applied to the generated data to make it more realistic.
 
 3. **Choose a Statistical Test**:
-   - The the statistical, one tailed z-test according nature of considered data
+   - The statistical one-tailed z-test is used according to the nature of the considered data.
 
 4. **Check Assumptions**:
 - Ensure that your samples satisfy the assumptions of the chosen statistical test. If they do not, consider selecting an alternative test
