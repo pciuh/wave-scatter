@@ -1,6 +1,6 @@
 # Hypothesis Testing
 
-This project focuses on scatter joint probabilities, properties, and hypothesis testing. The goal is to determine whether significant results can be expected based on the assumed statistical distribution, sample size, error levels, and other relevant factors. This guide outlines the minimum workflow required to conduct the project.
+This project focuses on the generation of artificial population data derived from scatter joint probabilities of wave properties. Hypothesis testing is applied to selected samples of varying sizes to assess the minimum sample size required for testing the sea development threshold.
 
 The data used in this project comes from the scatter diagram of wave heights and periods. The source is from the paper: *J. Prendergast, M. Li, and W. Sheng, "A Study on the Effects of Wave Spectra on Wave Energy Conversions," in IEEE Journal of Oceanic Engineering, vol. 45, no. 1, pp. 271-283, Jan. 2020, [doi: 10.1109/JOE.2018.2869636](https://doi.org/10.1109/JOE.2018.2869636).*
 
