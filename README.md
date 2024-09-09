@@ -2,6 +2,8 @@
 
 This project focuses on the generation of artificial population data derived from scatter joint probabilities of wave properties. Hypothesis testing is applied to selected samples of varying sizes to assess the minimum sample size required for testing the sea development threshold.
 
+This guide outlines the minimum workflow required to conduct the project presented via [jupyter-notebook](https://github.com/pciuh/hypothesis/blob/main/wave_scatter.ipynb).
+
 The data used in this project comes from the scatter diagram of wave heights and periods. The source is from the paper: *J. Prendergast, M. Li, and W. Sheng, "A Study on the Effects of Wave Spectra on Wave Energy Conversions," in IEEE Journal of Oceanic Engineering, vol. 45, no. 1, pp. 271-283, Jan. 2020, [doi: 10.1109/JOE.2018.2869636](https://doi.org/10.1109/JOE.2018.2869636).*
 
 ## Workflow
