@@ -180,14 +180,12 @@ zsc = scs.norm.ppf(1-alf)
 
 #### Large Sample
 t_size = N['L']/nData
-_,cht_s = train_test_split(cht,test_size=t_size)
+_,cht_l = train_test_split(cht,test_size=t_size)
 print()
-zs,pv = ztest(cht_s,mcht_p,scht_p,zsc,alf)
-vVal = (mcht_p,scht_p,len(cht_s),alf,zsc,zs,pv)
-dfo = pd.Series(dict(zip(pLbl,vVal))).round(4)
+zs,pv = ztest(cht_l,mcht_p,scht_p,zsc,alf)
+vVal = (mcht_p,scht_p,len(cht_l),alf,zsc,zs,pv)
+dfls = pd.Series(dict(zip(pLbl,vVal))).round(4)
 print()
-print(dfo)
-#dfo.to_csv('Test-L.csv',sep=';')
 
 #### Small Sample
 t_size = N['S']/nData
@@ -195,10 +193,12 @@ _,cht_s = train_test_split(cht,test_size=t_size)
 print()
 zs,pv = ztest(cht_s,mcht_p,scht_p,zsc,alf)
 vVal = (mcht_p,scht_p,len(cht_s),alf,zsc,zs,pv)
-dfo = pd.Series(dict(zip(pLbl,vVal))).round(4)
+dfss = pd.Series(dict(zip(pLbl,vVal))).round(4)
 print()
-print(dfo)
-#dfo.to_csv('Test-S.csv',sep=';')
+#print(dfss)
+
+dfa = pd.DataFrame({'small':dfss,'large':dfls})
+print(dfa)
 
 p_title = 'Estimated Data (Atlantinc Marine Energy Test Site)'
 LBL = ('Period, [s]','Wave height, [m]')
@@ -208,14 +208,9 @@ yMin,yMax = (0,16)
 dx,dy  = (4,2/3)
 
 p_linewidth = 2
-p_col= '#0088cc'
 p_alpha = 0.6
 p_size  = 40
 
-l_col = np.array([4,4,4])/255
-p_col = [x/255 for x in [250,140,80]]
-l_col = '#1e1e1e'
-p_col = '#f0a06e'
 cMap  = 'PuRd'
 
 
@@ -226,6 +221,20 @@ hex_col = [mcol.to_hex(cmap(i / num_colors)) for i in range(num_colors)]
 p_col = hex_col[4]
 l_col = hex_col[-4]
 
+fig,ax = plt.subplots(figsize=(4,3))
+flip = dict(markerfacecolor='none',markeredgecolor='none')
+boxp = dict(linestyle='-', linewidth=3, color=l_col)
+medp = dict(linestyle='-', linewidth=1, color=l_col)
+ax.boxplot([cht_s,cht_l],labels=['small','large'],
+                 flierprops=flip,boxprops=boxp,medianprops=medp,whiskerprops=medp,capprops=medp)
+xLim = ax.get_xlim()
+acol = 'tab:gray'
+ax.fill_between(xLim,[12,12],[mcht_p,mcht_p],color=acol,alpha=.10,label='open sea')
+ax.fill_between(xLim,[0,0],[mcht_p,mcht_p],color=acol,alpha=.30,label='offshore')
+ax.legend(frameon=False)
+ax.set_ylim(0,12)
+
+fig.savefig(pDir + 'boxplo.png',dpi=150)
 teg,hsg = np.meshgrid(vte,vhs)
 
 fig,ax = plt.subplots(figsize=(6,6))
